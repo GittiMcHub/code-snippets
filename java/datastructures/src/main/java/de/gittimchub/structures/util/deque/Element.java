@@ -1,4 +1,4 @@
-package de.gittimchub.structures.deque;
+package de.gittimchub.structures.util.deque;
 
 /**
  * @author GittiMcHub

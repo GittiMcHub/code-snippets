@@ -1,0 +1,17 @@
+# General
+alias ll='ls -lah'
+
+# git 
+alias pull='git pull'
+alias master='git checkout master && git pull'
+
+# terraform
+alias tf='terraform'
+alias tfp='terraform plan'
+alias tfa='terraform apply'
+
+# Kubernetes
+alias k='kubectl'
+alias kgp='kubectl get pods'
+alias kgv='kubectl get volumes'
+alias wkgp='watch -n5 kubectl get pods'
