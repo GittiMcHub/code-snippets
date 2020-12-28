@@ -15,3 +15,7 @@ alias k='kubectl'
 alias kgp='kubectl get pods'
 alias kgv='kubectl get volumes'
 alias wkgp='watch -n5 kubectl get pods'
+
+# Keypairs | example: fingerprint ~/.ssh/id_rsa
+alias fingerprint='ssh-keygen -l -v -f'
+alias fingerprintmd5='ssh-keygen -l -E md5 -f'
