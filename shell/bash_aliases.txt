@@ -1,8 +1,10 @@
 # General
 alias ll='ls -lah'
+alias e='echo'
 
 # git 
-alias pull='git pull'
+alias gp='git pull'
+alias gs='git status'
 alias master='git checkout master && git pull'
 
 # terraform
