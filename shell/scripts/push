@@ -1,4 +1,4 @@
-#!/bin/bash
+!/bin/bash
 git status
 
 read -p "Are you sure you want to add&push all of this? [y/N] " -n 1 -r
@@ -8,8 +8,9 @@ then
 fi
 echo ""
 
-read -p "Commit message: " -r 
+git add -p
+pre-commit
 
-git add .
+read -p "Commit message: " -r 
 git commit -m "$REPLY"
 git push
