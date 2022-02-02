@@ -10,3 +10,5 @@ for filename in ./*; do
    cp $filename /usr/bin/
  fi
 done
+
+pip install pre-commit
