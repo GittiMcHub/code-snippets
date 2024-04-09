@@ -5,6 +5,8 @@ alias e='echo'
 # git 
 alias gp='git pull'
 alias gs='git status'
+alias gcm='git commit -m'
+alias gcb='git checkout -b'
 alias master='git checkout master && git pull'
 
 # terraform
@@ -28,3 +30,4 @@ webmTOmp4 () {
 mp4TOmp3 () {
   ffmpeg -i "$1".mp4 "$1".mp3
 }
+

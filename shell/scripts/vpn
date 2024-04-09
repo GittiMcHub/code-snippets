@@ -6,25 +6,30 @@
 # fi
 
 COMMAND=$1
-OPENVPN_CONFIG="/home/to/your/config.ovpn"
+VPN_CONFIG="Home"
 
 case $COMMAND in
-"start")
-  openvpn3 session-start --config $OPENVPN_CONFIG
+"up")
+  wg-quick up $VPN_CONFIG
   ;;
-"disco")
-  openvpn3 session-manage --disconnect --config $OPENVPN_CONFIG
-  ;;
-"disconnect")
-  openvpn3 session-manage --disconnect --path $2 
-  ;;
-"sessions")
-  openvpn3 sessions-list
+"down")
+  wg-quick down $VPN_CONFIG
   ;;
 *)
+  ip a show $VPN_CONFIG > /dev/null
+  IS_ON=$?
+  if [ ${IS_ON} -eq 1 ]; then
+    echo "VPN is OFF - Starting..."
+    wg-quick up $VPN_CONFIG
+  fi
+  if [ ${IS_ON} -eq 0 ]; then
+    echo "VPN is ON - Disconnecting"
+    wg-quick down $VPN_CONFIG
+  fi
+  ;;
+"help")
   echo "USAGE:"
-  echo "  vpn start (openvpn3 session-start --config $OPENVPN_CONFIG)"
-  echo "  vpn disco (openvpn3 session-manage --disconnect --config $OPENVPN_CONFIG)"
-  echo "  vpn sessions (openvpn3 sessions-list)"
-  echo "  vpn disconnect <PARAM> (openvpn3 session-manage --disconnect --path )"
+  echo "  vpn up (= wg-quick up $CONFIG)"
+  echo "  vpn down (= wg-quick down $CONFIG)"
+  echo "  vpn (toggle up/down)"
 esac

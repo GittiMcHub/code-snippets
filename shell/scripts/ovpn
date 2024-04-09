@@ -1,0 +1,30 @@
+#!/bin/bash
+# 
+# <<.bash_rc >>
+# if [ -d "/opt/scripts" ] ; then
+#   PATH="$PATH:/opt/scripts"
+# fi
+
+COMMAND=$1
+OPENVPN_CONFIG="/home/to/your/config.ovpn"
+
+case $COMMAND in
+"start")
+  openvpn3 session-start --config $OPENVPN_CONFIG
+  ;;
+"disco")
+  openvpn3 session-manage --disconnect --config $OPENVPN_CONFIG
+  ;;
+"disconnect")
+  openvpn3 session-manage --disconnect --path $2 
+  ;;
+"sessions")
+  openvpn3 sessions-list
+  ;;
+*)
+  echo "USAGE:"
+  echo "  vpn start (openvpn3 session-start --config $OPENVPN_CONFIG)"
+  echo "  vpn disco (openvpn3 session-manage --disconnect --config $OPENVPN_CONFIG)"
+  echo "  vpn sessions (openvpn3 sessions-list)"
+  echo "  vpn disconnect <PARAM> (openvpn3 session-manage --disconnect --path )"
+esac

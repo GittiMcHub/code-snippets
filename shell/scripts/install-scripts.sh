@@ -1,7 +1,7 @@
 #!/bin/bash
 
-read -p "Path to OpenVPN config:" -r
-sed -i "s+/home/to/your/config.ovpn+$REPLY+" vpn
+#read -p "Path to OpenVPN config:" -r
+#sed -i "s+/home/to/your/config.ovpn+$REPLY+" vpn
 
 for filename in ./*; do
  if [ "$filename" != "$0" ]; then
