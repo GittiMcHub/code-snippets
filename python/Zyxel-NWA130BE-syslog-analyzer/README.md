@@ -47,10 +47,25 @@ AP_IP = "192.168.x.x"   # IP of your Zyxel AP
 IFACE = "any"            # network interface, or e.g. "eth0"
 ```
 
+## Device name map (optional)
+
+Pass a `key=value` file to replace MAC addresses with friendly names:
+
+```
+# devices.txt
+aa:bb:cc:dd:ee:ff=living-room-tv
+11:22:33:44:55:66=macbook-pro
+de:ad:be:ef:00:01=phone-alice
+```
+
+- One entry per line. `#` = comment. MACs case-insensitive.
+- Live output shows the name. Report header shows `name [mac]`.
+
 ## Usage
 
 ```bash
 sudo python3 wifi_watch.py
+sudo python3 wifi_watch.py --device-map devices.txt
 ```
 
 Uses `tcpdump` passively — does not bind port 514. Safe to run alongside other syslog listeners (e.g. Wazuh).
@@ -65,7 +80,7 @@ Requires `sudo` for `tcpdump` packet capture.
   2026-05-22 14:30:00
 ════════════════════════════════════════════════════════════════════
 
-  ┌─ aa:bb:cc:dd:ee:ff
+  ┌─ macbook-pro [aa:bb:cc:dd:ee:ff]
   │  connects:    12    disconnects: 14
   │  roaming:     11x   sta-timeout: 0x   kickouts: 0x
   │  signal:      avg -63 dBm   worst -73 dBm
@@ -73,7 +88,7 @@ Requires `sudo` for `tcpdump` packet capture.
   │  ⚠  roams 11x → marginal coverage, band steering or AP placement
   └───────────────────────────────────────────────────────
 
-  ┌─ ff:ee:dd:cc:bb:aa
+  ┌─ living-room-tv [ff:ee:dd:cc:bb:aa]
   │  connects:    8    disconnects: 12
   │  roaming:     2x   sta-timeout: 2x   kickouts: 5x
   │  lower-sig:   6x   rate-mismatch: 3x   auth-fail: 1x   reconnects: 0x
@@ -86,9 +101,9 @@ Requires `sudo` for `tcpdump` packet capture.
 
   RANKINGS
   ─────────────────────────────────────────────────────
-  Roaming:  aa:bb:cc:dd:ee:ff: 11x  |  ff:ee:dd:cc:bb:aa: 2x
-  Signal:   ff:ee:dd:cc:bb:aa: -81dBm avg  |  aa:bb:cc:dd:ee:ff: -63dBm avg
-  Needs attention: ff:ee:dd:cc:bb:aa (score 17)
+  Roaming:  macbook-pro: 11x  |  living-room-tv: 2x
+  Signal:   living-room-tv: -81dBm avg  |  macbook-pro: -63dBm avg
+  Needs attention: living-room-tv (score 17)
 ════════════════════════════════════════════════════════════════════
 ```
 

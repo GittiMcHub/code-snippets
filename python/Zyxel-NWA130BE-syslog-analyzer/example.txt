@@ -1,0 +1,7 @@
+# MAC=hostname device map for wifi_watch.py
+# Usage: sudo python3 wifi_watch.py --device-map devices.txt
+# MACs are case-insensitive. Lines starting with # are ignored.
+
+# aa:bb:cc:dd:ee:ff=living-room-tv
+# 11:22:33:44:55:66=macbook-pro
+# de:ad:be:ef:00:01=phone-alice

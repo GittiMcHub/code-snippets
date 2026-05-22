@@ -9,6 +9,7 @@ import subprocess
 import re
 import sys
 import signal
+import argparse
 from collections import defaultdict
 from datetime import datetime
 
@@ -53,7 +54,21 @@ REASON_CODES = {
 }
 
 devices = {}
+mac_names = {}
 proc = None
+
+def label(mac):
+    return mac_names.get(mac.lower(), mac)
+
+def load_device_map(path):
+    with open(path) as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith("#"):
+                continue
+            if "=" in line:
+                mac, name = line.split("=", 1)
+                mac_names[mac.strip().lower()] = name.strip()
 
 def get_dev(mac):
     mac = mac.lower()
@@ -65,13 +80,13 @@ def process_msg(ts, msg):
     m = RE_KICKOUT.search(msg)
     if m:
         get_dev(m.group(1)).kickouts += 1
-        print(f"  [{ts}] {m.group(1)}  KICKOUT")
+        print(f"  [{ts}] {label(m.group(1))}  KICKOUT")
         return
 
     m = RE_DEAUTH.search(msg)
     if m:
         get_dev(m.group(1)).deauths += 1
-        print(f"  [{ts}] {m.group(1)}  DEAUTH")
+        print(f"  [{ts}] {label(m.group(1))}  DEAUTH")
         return
 
     m = RE_CONNECTED.search(msg)
@@ -81,7 +96,7 @@ def process_msg(ts, msg):
         dev.connects.append((ts, band, channel, signal))
         dev.all_signals.append(signal)
         dev.bands[band] += 1
-        print(f"  [{ts}] {mac}  CONNECT    {band} ch{channel} {signal}dBm")
+        print(f"  [{ts}] {label(mac)}  CONNECT    {band} ch{channel} {signal}dBm")
         return
 
     m = RE_EVENT.search(msg)
@@ -95,7 +110,7 @@ def process_msg(ts, msg):
         dev.disconnects.append((ts, action, band, channel, signal, reason))
         dev.all_signals.append(signal)
         reason_desc = REASON_CODES.get(reason, "unknown")
-        print(f"  [{ts}] {mac}  {action.upper():<20} {band} ch{channel} {signal}dBm  reason={reason} ({reason_desc})")
+        print(f"  [{ts}] {label(mac)}  {action.upper():<20} {band} ch{channel} {signal}dBm  reason={reason} ({reason_desc})")
 
 def parse_line(line):
     m = RE_CEF.search(line)
@@ -128,7 +143,8 @@ def print_report():
         min_sig = min(dev.all_signals) if dev.all_signals else 0
         band_str = "  ".join(f"{b}:{c}x" for b, c in sorted(dev.bands.items()))
 
-        print(f"\n  ┌─ {mac}")
+        hdr = f"{mac_names[mac]} [{mac}]" if mac in mac_names else mac
+        print(f"\n  ┌─ {hdr}")
         print(f"  │  connects:    {len(dev.connects)}    disconnects: {len(dev.disconnects)}")
         print(f"  │  roaming:     {roaming}x   sta-timeout: {sta_to}x   kickouts: {dev.kickouts}x")
         if lower_sig or rate_mis or auth_fail or reconnect:
@@ -169,7 +185,7 @@ def print_report():
         reverse=True
     )
     roam_str = "  |  ".join(
-        f"{m}: {sum(1 for d in dev.disconnects if 'Intra Roaming' in d[1])}x"
+        f"{label(m)}: {sum(1 for d in dev.disconnects if 'Intra Roaming' in d[1])}x"
         for m, dev in by_roaming
         if sum(1 for d in dev.disconnects if "Intra Roaming" in d[1]) > 0
     )
@@ -180,7 +196,7 @@ def print_report():
         key=lambda x: sum(x[1].all_signals) / len(x[1].all_signals)
     )
     sig_str = "  |  ".join(
-        f"{m}: {sum(d.all_signals)/len(d.all_signals):.0f}dBm avg"
+        f"{label(m)}: {sum(d.all_signals)/len(d.all_signals):.0f}dBm avg"
         for m, d in by_signal
     )
     print(f"  Signal:   {sig_str or 'none'}")
@@ -195,7 +211,7 @@ def print_report():
 
     worst = max(devices.items(), key=lambda x: issue_score(x[1]), default=None)
     if worst and issue_score(worst[1]) > 0:
-        print(f"  Needs attention: {worst[0]} (score {issue_score(worst[1])})")
+        print(f"  Needs attention: {label(worst[0])} (score {issue_score(worst[1])})")
 
     print("═" * 68 + "\n")
 
@@ -211,6 +227,12 @@ signal.signal(signal.SIGINT, cleanup)
 
 def main():
     global proc
+    parser = argparse.ArgumentParser(description="Zyxel NWA WiFi Analyzer")
+    parser.add_argument("--device-map", metavar="FILE", help="MAC=hostname map file")
+    args = parser.parse_args()
+    if args.device_map:
+        load_device_map(args.device_map)
+
     cmd = [
         "tcpdump", "-i", IFACE,
         f"udp port 514 and src host {AP_IP}",
